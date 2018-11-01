@@ -15,24 +15,33 @@
  *  limitations under the License.
  */
 
-package io.openmessaging;
+package io.openmessaging.exception;
 
 /**
- * The {@code BytesMessage} contains a stream of uninterpreted bytes. It inherits from the {@code Message} interface and
- * adds a bytes message body.
- * <p>
- * The {@code BytesMessage} doesn't know the format or encoding rules of the body, the provider and consumer decide the
- * interpretation of the bytes body.
+ * The {@code OMSSecurityException} must be thrown when the client have no enough authority to operate an resource.
  *
  * @version OMS 1.0.0
  * @since OMS 1.0.0
  */
-public interface BytesMessage extends Message {
+public class OMSSecurityException extends OMSRuntimeException {
+    /**
+     * @see OMSRuntimeException#OMSRuntimeException(int, String)
+     */
+    public OMSSecurityException(int errorCode, String message) {
+        super(errorCode, message);
+    }
 
     /**
-     * Sets the bytes message body.
-     *
-     * @param body the message body to be set
+     * @see OMSRuntimeException#OMSRuntimeException(int, Throwable)
      */
-    BytesMessage setBody(byte[] body);
+    public OMSSecurityException(int errorCode, Throwable cause) {
+        super(errorCode, cause);
+    }
+
+    /**
+     * @see OMSRuntimeException#OMSRuntimeException(int, String, Throwable)
+     */
+    public OMSSecurityException(int errorCode, String message, Throwable cause) {
+        super(errorCode, message, cause);
+    }
 }

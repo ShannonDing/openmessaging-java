@@ -18,8 +18,7 @@
 package io.openmessaging.producer;
 
 /**
- * The result of sending a OMS message to server
- * with the message id and some attributes.
+ * The result of sending a OMS message to server with the message id and some attributes.
  *
  * @version OMS 1.0.0
  * @since OMS 1.0.0
@@ -28,7 +27,7 @@ public interface SendResult {
     /**
      * The unique message id related to the {@code SendResult} instance.
      *
-     * @return the message id
+     * @return the message id.
      */
     String messageId();
 }

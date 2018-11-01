@@ -18,30 +18,30 @@
 package io.openmessaging.exception;
 
 /**
- * The {@code OMSResourceNotExistException} occurs if requested resource is not exist.
+ * The {@code OMSTransactionException} must be thrown when the client execute a transaction error.
  *
  * @version OMS 1.0.0
  * @since OMS 1.0.0
  */
-public class OMSResourceNotExistException extends OMSException {
+public class OMSTransactionException extends OMSRuntimeException {
     /**
-     * @see OMSException#OMSException(String, String)
+     * @see OMSRuntimeException#OMSRuntimeException(int, String)
      */
-    public OMSResourceNotExistException(String errorCode, String message) {
+    public OMSTransactionException(int errorCode, String message) {
         super(errorCode, message);
     }
 
     /**
-     * @see OMSException#OMSException(String, Throwable)
+     * @see OMSRuntimeException#OMSRuntimeException(int, Throwable)
      */
-    public OMSResourceNotExistException(String errorCode, Throwable cause) {
+    public OMSTransactionException(int errorCode, Throwable cause) {
         super(errorCode, cause);
     }
 
     /**
-     * @see OMSException#OMSException(String, String, Throwable)
+     * @see OMSRuntimeException#OMSRuntimeException(int, String, Throwable)
      */
-    public OMSResourceNotExistException(String errorCode, String message, Throwable cause) {
+    public OMSTransactionException(int errorCode, String message, Throwable cause) {
         super(errorCode, message, cause);
     }
 }

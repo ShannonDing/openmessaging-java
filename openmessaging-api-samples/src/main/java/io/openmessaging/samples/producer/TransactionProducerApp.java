@@ -20,9 +20,9 @@ package io.openmessaging.samples.producer;
 import io.openmessaging.Message;
 import io.openmessaging.MessagingAccessPoint;
 import io.openmessaging.OMS;
-import io.openmessaging.producer.LocalTransactionExecutor;
 import io.openmessaging.producer.Producer;
-import io.openmessaging.producer.SendResult;
+import io.openmessaging.producer.TransactionStateCheckListener;
+import io.openmessaging.producer.TransactionalResult;
 import java.nio.charset.Charset;
 
 public class TransactionProducerApp {
@@ -30,38 +30,34 @@ public class TransactionProducerApp {
         final MessagingAccessPoint messagingAccessPoint =
             OMS.getMessagingAccessPoint("oms:rocketmq://alice@rocketmq.apache.org/us-east");
 
-        final Producer producer = messagingAccessPoint.createProducer();
-        messagingAccessPoint.startup();
-        producer.startup();
+        final Producer producer = messagingAccessPoint.createProducer(new TransactionStateCheckListener() {
+            @Override public void check(Message message, TransactionalContext context) {
+
+            }
+        });
+        producer.start();
 
         //Register a shutdown hook to close the opened endpoints.
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             @Override
             public void run() {
-                producer.shutdown();
-                messagingAccessPoint.shutdown();
+                producer.stop();
             }
         }));
 
-        Message message = producer.createBytesMessage(
+        Message message = producer.createMessage(
             "NS://HELLO_QUEUE", "HELLO_BODY".getBytes(Charset.forName("UTF-8")));
 
         //Sends a transaction message to the specified destination synchronously.
-        SendResult sendResult = producer.send(message, new LocalTransactionExecutor() {
-            @Override
-            public void execute(final Message message, final ExecutionContext context) {
-                //Do some local transaction
-                //Then commit this transaction and the message will be delivered.
-                context.commit();
-            }
+        TransactionalResult result = producer.prepare(message);
+        executeLocalTransaction(result);
+        result.commit();
+        producer.stop();
+        System.out.println("Send transaction message OK, message id is: " + result.messageId());
+    }
 
-            @Override
-            public void check(final Message message, final CheckContext context) {
-                //The server may lookup the transaction status forwardly associated the specified message
-                context.commit();
-            }
-        }, OMS.newKeyValue());
-
-        System.out.println("Send transaction message OK, message id is: " + sendResult.messageId());
+    private static void executeLocalTransaction(TransactionalResult result) {
+        System.out.println("transactionId: " + result.transactionId());
+        System.out.println("execute local transaction");
     }
 }

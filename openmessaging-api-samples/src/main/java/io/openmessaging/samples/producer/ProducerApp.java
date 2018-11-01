@@ -18,12 +18,16 @@
 package io.openmessaging.samples.producer;
 
 import io.openmessaging.Future;
-import io.openmessaging.FutureListener;
+import io.openmessaging.Message;
 import io.openmessaging.MessagingAccessPoint;
 import io.openmessaging.OMS;
+import io.openmessaging.interceptor.Context;
+import io.openmessaging.interceptor.ProducerInterceptor;
 import io.openmessaging.producer.Producer;
 import io.openmessaging.producer.SendResult;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProducerApp {
     public static void main(String[] args) {
@@ -31,61 +35,48 @@ public class ProducerApp {
             OMS.getMessagingAccessPoint("oms:rocketmq://alice@rocketmq.apache.org/us-east");
 
         final Producer producer = messagingAccessPoint.createProducer();
-        messagingAccessPoint.startup();
-        producer.startup();
+        producer.start();
+        ProducerInterceptor interceptor = new ProducerInterceptor() {
+            @Override
+            public void preSend(Message message, Context attributes) {
+            }
+
+            @Override
+            public void postSend(Message message, Context attributes) {
+            }
+        };
+        producer.addInterceptor(interceptor);
 
         //Register a shutdown hook to close the opened endpoints.
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             @Override
             public void run() {
-                producer.shutdown();
-                messagingAccessPoint.shutdown();
+                producer.stop();
             }
         }));
 
         //Sends a message to the specified destination synchronously.
-        {
-            SendResult sendResult = producer.send(producer.createBytesMessage(
-                "NS://HELLO_QUEUE", "HELLO_BODY".getBytes(Charset.forName("UTF-8"))));
+        Message message = producer.createMessage(
+            "NS://HELLO_QUEUE", "HELLO_BODY".getBytes(Charset.forName("UTF-8")));
+        SendResult sendResult = producer.send(message);
+        System.out.println("SendResult: " + sendResult);
 
-            System.out.println("Send sync message OK, message id is: " + sendResult.messageId());
+        //Sends a message to the specified destination async.
+        Future<SendResult> sendResultFuture = producer.sendAsync(message);
+        sendResult = sendResultFuture.get(1000);
+        System.out.println("SendResult: " + sendResult);
+
+        //Sends a message to the specified destination in one way mode.
+        producer.sendOneway(message);
+
+        //Sends messages to the specified destination in batch mode.
+        List<Message> messages = new ArrayList<Message>(10);
+        for (int i = 0; i < 10; i++) {
+            Message msg = producer.createMessage("NS://HELLO_QUEUE", ("Hello" + i).getBytes());
+            messages.add(msg);
         }
-
-        //Sends a message to the specified destination asynchronously.
-        //And get the result through Future
-        {
-            final Future<SendResult> result = producer.sendAsync(producer.createBytesMessage(
-                "NS://HELLO_QUEUE", "HELLO_BODY".getBytes(Charset.forName("UTF-8"))));
-
-            final SendResult sendResult = result.get(3000L);
-            System.out.println("Send async message OK, message id is: " + sendResult.messageId());
-        }
-
-        //Sends a message to the specified destination asynchronously.
-        //And retrieve the result through FutureListener
-        {
-            final Future<SendResult> result = producer.sendAsync(producer.createBytesMessage(
-                "NS://HELLO_QUEUE", "HELLO_BODY".getBytes(Charset.forName("UTF-8"))));
-
-            result.addListener(new FutureListener<SendResult>() {
-
-                @Override
-                public void operationComplete(Future<SendResult> future) {
-                    if (future.isDone() && null == future.getThrowable()) {
-                        System.out.println("Send async message OK, message id is: " + future.get().messageId());
-                    } else {
-                        System.out.println("Send async message Failed, cause is: " + future.getThrowable().getMessage());
-                    }
-                }
-            });
-        }
-
-        //Sends a message to the specific queue in OneWay manner.
-        {
-            //There is no {@code Future} related or {@code RuntimeException} thrown. The calling thread doesn't
-            //care about the send result and also have no context to get the result.
-            producer.sendOneway(producer.createBytesMessage(
-                "NS://HELLO_QUEUE", "HELLO_BODY".getBytes(Charset.forName("UTF-8"))));
-        }
+        producer.send(messages);
+        producer.removeInterceptor(interceptor);
+        producer.stop();
     }
 }

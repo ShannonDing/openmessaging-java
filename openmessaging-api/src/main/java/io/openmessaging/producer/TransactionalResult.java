@@ -15,31 +15,30 @@
  *  limitations under the License.
  */
 
-package io.openmessaging.interceptor;
-
-import io.openmessaging.Message;
-import io.openmessaging.consumer.MessageListener;
+package io.openmessaging.producer;
 
 /**
- * A {@code ConsumerInterceptor} is used to intercept consume operations of push consumer.
+ * The result of sending a OMS prepare message to server with the message id, this result can be used to commits or or
+ * rolls back a prepare message.
  *
  * @version OMS 1.0.0
  * @since OMS 1.0.0
  */
-public interface ConsumerInterceptor {
+public interface TransactionalResult extends SendResult {
     /**
-     * Invoked before the invocation of {@link MessageListener#onReceived(Message, MessageListener.Context)}.
+     * The unique transactionId id related to the {@code TransactionResult} instance.
      *
-     * @param message the message is actually received.
-     * @param attributes the extensible attributes delivered to the intercept thread.
+     * @return the transactional id
      */
-    void preReceive(Message message, Context attributes);
+    String transactionId();
 
     /**
-     * Invoked after the invocation of {@link MessageListener#onReceived(Message, MessageListener.Context)}.
-     *
-     * @param message the message is actually received.
-     * @param attributes the extensible attributes delivered to the intercept thread.
+     * Commits a transaction.
      */
-    void postReceive(Message message, Context attributes);
+    void commit();
+
+    /**
+     * Rolls back a transaction.
+     */
+    void rollback();
 }

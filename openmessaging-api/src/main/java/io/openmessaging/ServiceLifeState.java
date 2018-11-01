@@ -15,31 +15,38 @@
  *  limitations under the License.
  */
 
-package io.openmessaging.interceptor;
-
-import io.openmessaging.Message;
-import io.openmessaging.consumer.MessageListener;
+package io.openmessaging;
 
 /**
- * A {@code ConsumerInterceptor} is used to intercept consume operations of push consumer.
+ * A collection of all service states.
  *
  * @version OMS 1.0.0
  * @since OMS 1.0.0
  */
-public interface ConsumerInterceptor {
-    /**
-     * Invoked before the invocation of {@link MessageListener#onReceived(Message, MessageListener.Context)}.
-     *
-     * @param message the message is actually received.
-     * @param attributes the extensible attributes delivered to the intercept thread.
-     */
-    void preReceive(Message message, Context attributes);
+public enum ServiceLifeState {
 
     /**
-     * Invoked after the invocation of {@link MessageListener#onReceived(Message, MessageListener.Context)}.
-     *
-     * @param message the message is actually received.
-     * @param attributes the extensible attributes delivered to the intercept thread.
+     * Service has been initialized.
      */
-    void postReceive(Message message, Context attributes);
+    INITIALIZED,
+
+    /**
+     * Service in starting.
+     */
+    STARTING,
+
+    /**
+     * Service in running.
+     */
+    STARTED,
+
+    /**
+     * Service is stopping.
+     */
+    STOPING,
+
+    /**
+     * Service has been stopped.
+     */
+    STOPED,
 }

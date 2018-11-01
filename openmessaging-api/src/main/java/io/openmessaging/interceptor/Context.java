@@ -14,35 +14,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package io.openmessaging.interceptor;
 
-package io.openmessaging.exception;
+import io.openmessaging.KeyValue;
 
 /**
- * The {@code OMSNotSupportedException} must be thrown when the OMS vendor
- * can't provide some feature defined by the standard.
+ * A {@code Context} is used to transfer user's business data in the interceptor.
  *
  * @version OMS 1.0.0
  * @since OMS 1.0.0
  */
-public class OMSNotSupportedException extends OMSRuntimeException {
-    /**
-     * @see OMSRuntimeException#OMSRuntimeException(String, String)
-     */
-    public OMSNotSupportedException(String errorCode, String message) {
-        super(errorCode, message);
-    }
+public interface Context {
 
     /**
-     * @see OMSRuntimeException#OMSRuntimeException(String, Throwable)
+     * Returns the attributes of this {@code Context} instance.
+     *
+     * @return the attributes.
      */
-    public OMSNotSupportedException(String errorCode, Throwable cause) {
-        super(errorCode, cause);
-    }
-
-    /**
-     * @see OMSRuntimeException#OMSRuntimeException(String, String, Throwable)
-     */
-    public OMSNotSupportedException(String errorCode, String message, Throwable cause) {
-        super(errorCode, message, cause);
-    }
+    KeyValue attributes();
 }

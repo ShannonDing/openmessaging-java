@@ -21,27 +21,27 @@ import io.openmessaging.KeyValue;
 import io.openmessaging.MessagingAccessPoint;
 import io.openmessaging.OMS;
 import io.openmessaging.OMSBuiltinKeys;
+import io.openmessaging.OMSResponseStatus;
 import io.openmessaging.exception.OMSRuntimeException;
 import java.lang.reflect.Constructor;
 
-import static io.openmessaging.internal.InternalErrorCode.generateInternalException;
+import static io.openmessaging.OMSResponseStatus.generateException;
 
 /**
- * The {@code MessagingAccessPointAdapter} provides a common implementation to
- * create a specified {@code MessagingAccessPoint} instance, used by OMS internally.
+ * The {@code MessagingAccessPointAdapter} provides a common implementation to create a specified {@code
+ * MessagingAccessPoint} instance, used by OMS internally.
  *
  * @version OMS 1.0.0
  * @since OMS 1.0.0
  */
 public class MessagingAccessPointAdapter {
     /**
-     * Returns a {@code MessagingAccessPoint} instance from the specified OMS driver URL
-     * with some preset userHeaders.
+     * Returns a {@code MessagingAccessPoint} instance from the specified OMS driver URL with some preset userHeaders.
      *
-     * @param url the driver URL
-     * @param attributes the preset userHeaders
-     * @return a {@code MessagingAccessPoint} instance
-     * @throws OMSRuntimeException if the adapter fails to create a {@code MessagingAccessPoint} instance from the URL
+     * @param url the driver URL.
+     * @param attributes the preset userHeaders.
+     * @return a {@code MessagingAccessPoint} instance.
+     * @throws OMSRuntimeException if the adapter fails to create a {@code MessagingAccessPoint} instance from the URL.
      */
     public static MessagingAccessPoint getMessagingAccessPoint(String url, KeyValue attributes) {
         AccessPointURI accessPointURI = new AccessPointURI(url);
@@ -56,10 +56,10 @@ public class MessagingAccessPointAdapter {
             Class<?> driverImplClass = Class.forName(driverImpl);
             Constructor constructor = driverImplClass.getConstructor(KeyValue.class);
             MessagingAccessPoint vendorImpl = (MessagingAccessPoint) constructor.newInstance(attributes);
-            checkSpecVersion(OMS.specVersion, vendorImpl.implVersion());
+            checkSpecVersion(OMS.specVersion, vendorImpl.version());
             return vendorImpl;
         } catch (Throwable e) {
-            throw generateInternalException(InternalErrorCode.OMS_DRIVER_UNAVAILABLE, url);
+            throw generateException(OMSResponseStatus.STATUS_10000, url);
         }
     }
 
@@ -76,10 +76,10 @@ public class MessagingAccessPointAdapter {
         try {
             majorVerOfImpl = implVersion.substring(0, implVersion.indexOf('.', implVersion.indexOf('.') + 1));
         } catch (Throwable e) {
-            throw generateInternalException(InternalErrorCode.IMPL_VERSION_ILLEGAL, implVersion);
+            throw generateException(OMSResponseStatus.STATUS_10002, implVersion);
         }
         if (!majorVerOfSpec.equals(majorVerOfImpl)) {
-            throw generateInternalException(InternalErrorCode.SPEC_IMPL_VERSION_MISMATCH, implVersion, specVersion);
+            throw generateException(OMSResponseStatus.STATUS_10003, implVersion, specVersion);
         }
     }
 }

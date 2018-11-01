@@ -21,18 +21,17 @@ import io.openmessaging.KeyValue;
 import io.openmessaging.MessagingAccessPoint;
 import io.openmessaging.OMS;
 import io.openmessaging.OMSBuiltinKeys;
-import io.openmessaging.ResourceManager;
-import io.openmessaging.consumer.PullConsumer;
-import io.openmessaging.consumer.PushConsumer;
-import io.openmessaging.consumer.StreamingConsumer;
+import io.openmessaging.consumer.Consumer;
+import io.openmessaging.manager.ResourceManager;
 import io.openmessaging.producer.Producer;
+import io.openmessaging.producer.TransactionStateCheckListener;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class MessagingAccessPointAdapterTest {
     @Test
-    public void getMessagingAccessPoint() throws Exception {
+    public void getMessagingAccessPoint() {
         String testURI = "oms:test-vendor://alice@rocketmq.apache.org/us-east:default_space";
 
         KeyValue keyValue = OMS.newKeyValue();
@@ -47,8 +46,12 @@ class TestVendor implements MessagingAccessPoint {
     public TestVendor(KeyValue keyValue) {
     }
 
+    @Override public Producer createProducer(TransactionStateCheckListener transactionStateCheckListener) {
+        return null;
+    }
+
     @Override
-    public String implVersion() {
+    public String version() {
         return OMS.specVersion;
     }
 
@@ -63,52 +66,12 @@ class TestVendor implements MessagingAccessPoint {
     }
 
     @Override
-    public Producer createProducer(final KeyValue attributes) {
-        return null;
-    }
-
-    @Override
-    public PushConsumer createPushConsumer() {
-        return null;
-    }
-
-    @Override
-    public PushConsumer createPushConsumer(final KeyValue attributes) {
-        return null;
-    }
-
-    @Override
-    public PullConsumer createPullConsumer() {
-        return null;
-    }
-
-    @Override
-    public PullConsumer createPullConsumer(final KeyValue attributes) {
-        return null;
-    }
-
-    @Override
-    public StreamingConsumer createStreamingConsumer() {
-        return null;
-    }
-
-    @Override
-    public StreamingConsumer createStreamingConsumer(final KeyValue attributes) {
+    public Consumer createConsumer() {
         return null;
     }
 
     @Override
     public ResourceManager resourceManager() {
         return null;
-    }
-
-    @Override
-    public void startup() {
-
-    }
-
-    @Override
-    public void shutdown() {
-
     }
 }
